@@ -43,11 +43,9 @@ impl Field {
             for j in 0..field.state[0].len() {
                 let color = Self::get_color_of_id(field.state[i][j]);
 
-                // Rect has hella ctors, picked this one bc it's closer to
-                // javaswing implementation.
-                // the origin is the center, not top left corner.
-
                 let side = (field.scale - 1) as f32;
+
+                // cell origin will be top left corner
                 let cell = Rect::from_w_h(side, side).top_left_of(win);
 
                 draw.rect()
@@ -62,24 +60,45 @@ impl Field {
 
         let color = BLACK;
 
-        // draw rows
+        // draw cols
         for i in 0..=field.state.len() {
-            let start = pt2((i * field.scale) as f32, 0.0);
-            let end = pt2(
-                (i * field.scale) as f32,
-                (field.state[0].len() * field.scale) as f32,
+            let width = win.w();
+            let height = win.h();
+
+            let start = pt2(
+                ((i * field.scale) as f32 - width / 2.0) as f32,
+                -height / 2.0,
             );
-            // draw.line().start(start).end(end).stroke_weight(2.0).color(color);
+            let end = pt2(
+                ((i * field.scale) as f32 - width / 2.0) as f32,
+                (field.state[0].len() * field.scale) as f32 - height / 2.0,
+            );
+            draw.line()
+                .start(start)
+                .end(end)
+                .stroke_weight(2.0)
+                .color(color);
         }
 
-        // draw columns
+        // draw rows
+        // why tf is state[0] the amount of rows and not cols ??
         for i in 0..=field.state[0].len() {
-            let start = pt2(0.0, (i * field.scale) as f32);
-            let end = pt2(
-                (field.state.len() * field.scale) as f32,
-                (i * field.scale) as f32,
+            let width = win.w();
+            let height = win.h();
+
+            let start = pt2(
+                -width / 2.0,
+                ((i * field.scale) as f32 - height / 2.0) as f32,
             );
-            // draw.line().start(start).end(end).stroke_weight(2.0).color(color);
+            let end = pt2(
+                (field.state.len() * field.scale) as f32 - width / 2.0,
+                ((i * field.scale) as f32 - height / 2.0) as f32,
+            );
+            draw.line()
+                .start(start)
+                .end(end)
+                .stroke_weight(2.0)
+                .color(color);
         }
 
         draw.to_frame(app, &frame).unwrap();
