@@ -12,7 +12,7 @@ impl Field {
         let rows = 10;
         let cols = 10;
 
-        let state = vec![vec![-1; rows]; cols];
+        let state = vec![vec![-1; cols]; rows];
         let scale = 20;
 
         let _window = app
@@ -56,33 +56,10 @@ impl Field {
             }
         }
 
-        // TODO make the rows and cols align with the cells
-
         let color = BLACK;
 
-        // draw cols
-        for i in 0..=field.state.len() {
-            let width = win.w();
-            let height = win.h();
-
-            let start = pt2(
-                ((i * field.scale) as f32 - width / 2.0) as f32,
-                -height / 2.0,
-            );
-            let end = pt2(
-                ((i * field.scale) as f32 - width / 2.0) as f32,
-                (field.state[0].len() * field.scale) as f32 - height / 2.0,
-            );
-            draw.line()
-                .start(start)
-                .end(end)
-                .stroke_weight(2.0)
-                .color(color);
-        }
-
         // draw rows
-        // why tf is state[0] the amount of rows and not cols ??
-        for i in 0..=field.state[0].len() {
+        for i in 0..=field.state.len() {
             let width = win.w();
             let height = win.h();
 
@@ -93,6 +70,26 @@ impl Field {
             let end = pt2(
                 (field.state.len() * field.scale) as f32 - width / 2.0,
                 ((i * field.scale) as f32 - height / 2.0) as f32,
+            );
+            draw.line()
+                .start(start)
+                .end(end)
+                .stroke_weight(2.0)
+                .color(color);
+        }
+
+        // draw cols
+        for i in 0..=field.state[0].len() {
+            let width = win.w();
+            let height = win.h();
+
+            let start = pt2(
+                ((i * field.scale) as f32 - width / 2.0) as f32,
+                -height / 2.0,
+            );
+            let end = pt2(
+                ((i * field.scale) as f32 - width / 2.0) as f32,
+                (field.state[0].len() * field.scale) as f32 - height / 2.0,
             );
             draw.line()
                 .start(start)
