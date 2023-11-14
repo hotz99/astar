@@ -1,4 +1,4 @@
-use crate::Model;
+use crate::{astar, Model};
 use nannou::prelude::*;
 
 pub fn draw(app: &App, model: &Model, frame: Frame) {
@@ -13,22 +13,22 @@ pub fn draw(app: &App, model: &Model, frame: Frame) {
     // draw nodes
     for i in 0..field.len() {
         for j in 0..field[0].len() {
-            let color = get_color_of_id(field[i][j]);
+            let node = &field[i][j];
+
+            // println!("{node:?}");
 
             let side = (scale - 1) as f32;
-
+            
             // node origin will be top left corner
-            let node = Rect::from_w_h(side, side).top_left_of(win);
+            let node_visual = Rect::from_w_h(side, side).top_left_of(win);
 
             // todo: display node fcost, gcost, hcost
 
             draw.rect()
-                .x(node.x() + (j as u32 * scale) as f32)
-                .y(node.y() - (i as u32 * scale) as f32)
-                .wh(node.wh())
-                .color(color);
-
-            // add new node
+                .x(node_visual.x() + (j as u32 * scale) as f32)
+                .y(node_visual.y() - (i as u32 * scale) as f32)
+                .wh(node_visual.wh())
+                .color(get_color_of_id(node.colorId));
         }
     }
 
@@ -73,8 +73,9 @@ pub fn draw(app: &App, model: &Model, frame: Frame) {
             .stroke_weight(4.0)
             .color(color);
 
-        draw.to_frame(app, &frame).unwrap();
     }
+
+    draw.to_frame(app, &frame).unwrap();
 }
 
 fn get_color_of_id(id: i32) -> Srgb<u8> {
