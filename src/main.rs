@@ -2,7 +2,6 @@ mod astar;
 mod field;
 
 use astar::Node;
-use field::*;
 use nannou::prelude::*;
 
 fn main() {
@@ -16,35 +15,50 @@ pub struct Model {
     goal: (u32, u32),
 }
 
+// app state, basically
+// shared by reference to search() and others
 fn model(app: &App) -> Model {
-    let WIDTH: u32 = 10;
-    let HEIGHT: u32 = 10;
-
-    let mut field = vec![vec![astar::Node::new(); WIDTH as usize]; HEIGHT as usize];
+    let width: u32 = 10;
+    let height: u32 = 10;
     
+    let mut field = Vec::new();
+    
+    for row in 0..height {
+        let mut row_nodes = Vec::new();
+        for col in 0..width {
+            row_nodes.push(Node::new(row, col));
+        }
+        field.push(row_nodes);
+    }
+
     let start: (u32, u32) = (8, 9);
     let goal: (u32, u32) = (3, 4);
 
-    // setting colors for start/goal nodes
-    field[start.0 as usize][start.1 as usize].colorId = 0;
-    field[goal.0 as usize][goal.1 as usize].colorId = 1;
+    // setting start/goal node colors to blue/green
+    field[start.0 as usize][start.1 as usize].color_id = 0;
+    field[goal.0 as usize][goal.1 as usize].color_id = 1;
+    
 
     let scale = 50;
 
     app.new_window()
         // fit the window to the grid
-        .size(WIDTH * scale, HEIGHT * scale)
+        .size(width * scale, height * scale)
         // .size(512, 512)
         .view(field::draw)
         .build()
         .unwrap();
 
-    Model {
+    let mut model = Model {
         field: field,
         field_scale: scale,
         start: start,
         goal: goal,
-    }
+    };
+
+    astar::search(&mut model);
+
+    return model;
 }
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {

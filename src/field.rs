@@ -1,4 +1,4 @@
-use crate::{astar, Model};
+use crate::Model;
 use nannou::prelude::*;
 
 pub fn draw(app: &App, model: &Model, frame: Frame) {
@@ -15,8 +15,6 @@ pub fn draw(app: &App, model: &Model, frame: Frame) {
         for j in 0..field[0].len() {
             let node = &field[i][j];
 
-            // println!("{node:?}");
-
             let side = (scale - 1) as f32;
             
             // node origin will be top left corner
@@ -28,7 +26,7 @@ pub fn draw(app: &App, model: &Model, frame: Frame) {
                 .x(node_visual.x() + (j as u32 * scale) as f32)
                 .y(node_visual.y() - (i as u32 * scale) as f32)
                 .wh(node_visual.wh())
-                .color(get_color_of_id(node.colorId));
+                .color(get_color_of_id(node.color_id));
         }
     }
 
