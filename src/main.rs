@@ -1,7 +1,7 @@
 mod astar;
-mod field;
+mod grid;
 
-use astar::Node;
+use grid::Node;
 use nannou::prelude::*;
 
 fn main() {
@@ -15,7 +15,7 @@ pub struct Model {
     goal: (u32, u32),
 }
 
-// app state, basically
+// app state
 // shared by reference to search() and others
 fn model(app: &App) -> Model {
     let width: u32 = 10;
@@ -45,7 +45,7 @@ fn model(app: &App) -> Model {
         // fit the window to the grid
         .size(width * scale, height * scale)
         // .size(512, 512)
-        .view(field::draw)
+        .view(grid::draw)
         .build()
         .unwrap();
 
@@ -56,9 +56,15 @@ fn model(app: &App) -> Model {
         goal: goal,
     };
 
-    astar::search(&mut model);
+    if let Some(path) = astar::search(&mut model) {
+        for mut node in path {
+            node.color_id = 2;
+        }
+    } else {
+        println!("astar failed");
+    }
 
-    return model;
+    model
 }
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {

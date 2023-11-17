@@ -1,6 +1,23 @@
 use crate::Model;
 use nannou::prelude::*;
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
+pub struct Node {
+    pub row: u32,
+    pub col: u32,
+    pub color_id: i32,
+}
+
+impl Node {
+    pub fn new(row: u32, col: u32) -> Self {
+        Node {
+            row: row,
+            col: col,
+            color_id: -1,
+        }
+    }
+}
+
 pub fn draw(app: &App, model: &Model, frame: Frame) {
     let draw = app.draw();
     draw.background().color(LIGHTGRAY);
@@ -83,6 +100,7 @@ fn get_color_of_id(id: i32) -> Srgb<u8> {
         0 => DODGERBLUE,
         // finish node
         1 => LIMEGREEN,
-        _ => GREY,
+        2 => YELLOW,
+        _ => LIGHTGREY,
     }
 }

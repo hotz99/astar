@@ -1,63 +1,88 @@
-use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashSet, HashMap};
 
+use crate::grid::Node;
 use crate::Model;
 
-pub fn search(model: &mut Model) {
+pub fn search(model: &mut Model) -> Option<Vec<Node>> {
     let field = &model.field;
     let start = field[model.start.0 as usize][model.start.1 as usize];
     let goal = field[model.goal.0 as usize][model.goal.1 as usize];
 
     println!("{start:?}");
     println!("{goal:?}");
-
-    let mut g_score: HashMap<Node, u32> = HashMap::new();
-    let mut f_score: HashMap<Node, f64> = HashMap::new();
-
-    // 2d vec to 1d vec, probably inefficient ?
-    let nodes: Vec<Node> = field.iter().flat_map(|row| row.iter().cloned()).collect();
-
-    for node in nodes {
-        g_score.insert(node, u32::MAX);
-        f_score.insert(node, f64::MAX);
-    }
-
-    g_score.insert(start, 0);
-    f_score.insert(start, euclidian_distance(&start, &goal));
-
     
-    let mut open: BinaryHeap<Node> = BinaryHeap::new();
+    // nodes to be evaluated
+    let mut open: BinaryHeap<NodeState> = BinaryHeap::new();
+    open.push(NodeState::new(start, 0, manhattan(&start, &goal)));
+
+    // nodes already evaluated
     // no need to order closed nodes, so we use a (hash)set
     let mut closed: HashSet<Node> = HashSet::new();
+
+    // children nodes come from parent nodes
+    let mut parents: HashMap<Node, Node> = HashMap::new();
 
     while open.len() > 0 {
         // open is a min-heap, peek() returns the root of the heap
         // checking if peek() does not return None
-        if let Some(&current) = open.peek() {
+        if let Some(&node_state) = open.peek() {
+            let current = node_state.node;
+            
+            if current == goal {
+                return Some(path(&parents, current));
+            }
+            
             open.pop();
             closed.insert(current);
 
-            if current == goal {
-                print!("DONE");
-            }
-
             for neighbor in get_neighbors(field, &current) {
-                println!("{neighbor:?}");
-
                 if closed.contains(&neighbor) {
                     continue;
+                }
+
+                // tentative_g_score is the distance from start to the neighbor through current
+                let tentative_g_score = node_state.g_cost + manhattan(&current, &neighbor);
+
+                let mut neighbor_state = NodeState::new(neighbor, manhattan(&start, &neighbor), manhattan(&neighbor, &goal));
+
+                // if this path to neighbor is better than previous one
+                if tentative_g_score < neighbor_state.g_cost {
+                    parents.insert(neighbor, current);
+                    neighbor_state.g_cost = tentative_g_score;
+                    neighbor_state.f_cost = tentative_g_score + neighbor_state.h_cost;
+
+                    // binary heaps dont have .contains()
+                    if !open.iter().any(|x| x.node == neighbor) {
+                        open.push(neighbor_state);
+                    }
                 }
             }
         }
     }
+
+    None
 }
 
-// heuristic
-fn euclidian_distance(node: &Node, goal: &Node) -> f64 {
-    let dx = ((node.col - goal.col) as f64).abs();
-    let dy = ((node.row - goal.row) as f64).abs();
-    ((dx * dx) + (dy * dy)).sqrt()
+// our heuristic is the manhattan distance formula
+fn manhattan(node: &Node, goal: &Node) -> u32 {
+    let dx = node.col.abs_diff(goal.col);
+    let dy = node.row.abs_diff(goal.row);
+
+    dx + dy
 }
+
+fn path(parents: &HashMap<Node, Node>, node: Node) -> Vec<Node> {
+    let mut current = node;
+    let mut path = vec![node];
+
+    while let Some(parent) = parents.get(&current) {
+        path.insert(0, *parent);
+        current = *parent;
+    }
+
+    path
+}
+
 
 fn get_neighbors(field: &Vec<Vec<Node>>, node: &Node) -> Vec<Node> {
     let mut neighbors = Vec::new();
@@ -81,40 +106,33 @@ fn get_neighbors(field: &Vec<Vec<Node>>, node: &Node) -> Vec<Node> {
     neighbors
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub struct Node {
-    pub row: u32,
-    pub col: u32,
-    pub f_cost: i32,
-    pub g_cost: i32,
-    pub h_cost: i32,
-    pub color_id: i32,
+// binary heap -> priority queue
+// priority queue depends on 'Ord'
+// implement the trait such that the bin heap becomes a min-heap
+
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+struct NodeState {
+    node: Node,
+    g_cost: u32,
+    h_cost: u32,
+    // f(n) = g(n) + h(n)
+    f_cost: u32
 }
 
-impl Node {
-    pub fn new(row: u32, col: u32) -> Self {
-        Node {
-            row: row,
-            col: col,
-            f_cost: -1,
-            g_cost: -1,
-            h_cost: -1,
-            color_id: -1,
-        }
+impl NodeState {
+    fn new(node: Node, g_cost: u32, h_cost: u32) -> NodeState {
+        NodeState { node: (node), g_cost: (g_cost), h_cost: (h_cost), f_cost: (g_cost + h_cost) }
     }
 }
 
-// implementation of the Ord trait +
-// defining how the cmp function should work for Node
-impl Ord for Node {
-    fn cmp(&self, other: &Self) -> Ordering {
-        // ordering by lowest fcost makes our heap a min-heap
+impl PartialOrd for NodeState {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        other.f_cost.partial_cmp(&self.f_cost)
+    }
+}
+
+impl Ord for NodeState {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         other.f_cost.cmp(&self.f_cost)
-    }
-}
-
-impl PartialOrd for Node {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
     }
 }
