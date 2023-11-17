@@ -57,8 +57,9 @@ fn model(app: &App) -> Model {
     };
 
     if let Some(path) = astar::search(&mut model) {
-        for mut node in path {
-            node.color_id = 2;
+        for (row, col) in path {
+            println!("NODE ({}, {})", row, col);
+            model.field[row as usize][col as usize].color_id = 2;
         }
     } else {
         println!("astar failed");

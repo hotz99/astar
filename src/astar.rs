@@ -3,7 +3,7 @@ use std::collections::{BinaryHeap, HashSet, HashMap};
 use crate::grid::Node;
 use crate::Model;
 
-pub fn search(model: &mut Model) -> Option<Vec<Node>> {
+pub fn search(model: &mut Model) -> Option<Vec<(u32, u32)>> {
     let field = &model.field;
     let start = field[model.start.0 as usize][model.start.1 as usize];
     let goal = field[model.goal.0 as usize][model.goal.1 as usize];
@@ -25,14 +25,13 @@ pub fn search(model: &mut Model) -> Option<Vec<Node>> {
     while open.len() > 0 {
         // open is a min-heap, peek() returns the root of the heap
         // checking if peek() does not return None
-        if let Some(&node_state) = open.peek() {
+        if let Some(node_state) = open.pop() {
             let current = node_state.node;
             
             if current == goal {
                 return Some(path(&parents, current));
             }
             
-            open.pop();
             closed.insert(current);
 
             for neighbor in get_neighbors(field, &current) {
@@ -51,10 +50,9 @@ pub fn search(model: &mut Model) -> Option<Vec<Node>> {
                     neighbor_state.g_cost = tentative_g_score;
                     neighbor_state.f_cost = tentative_g_score + neighbor_state.h_cost;
 
-                    // binary heaps dont have .contains()
-                    if !open.iter().any(|x| x.node == neighbor) {
-                        open.push(neighbor_state);
-                    }
+                        // binary heaps dont have .contains()
+                } else if !open.iter().any(|x| x.node == neighbor) {
+                    open.push(neighbor_state);
                 }
             }
         }
@@ -71,12 +69,12 @@ fn manhattan(node: &Node, goal: &Node) -> u32 {
     dx + dy
 }
 
-fn path(parents: &HashMap<Node, Node>, node: Node) -> Vec<Node> {
+fn path(parents: &HashMap<Node, Node>, node: Node) -> Vec<(u32, u32)> {
     let mut current = node;
-    let mut path = vec![node];
+    let mut path = vec![(current.row, current.col)];
 
     while let Some(parent) = parents.get(&current) {
-        path.insert(0, *parent);
+        path.insert(0, (parent.row, parent.col));
         current = *parent;
     }
 
