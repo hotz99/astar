@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 nannou = "0.18.1"
+ordered-float = "4.1.1"

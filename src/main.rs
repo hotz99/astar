@@ -9,37 +9,37 @@ fn main() {
 }
 
 pub struct Model {
-    field: Vec<Vec<Node>>,
-    field_scale: u32,
+    grid: Vec<Vec<Node>>,
+    grid_scale: u32,
     start: (u32, u32),
     goal: (u32, u32),
+    path: Option<Vec<(u32, u32)>>
 }
 
 // app state
 // shared by reference to search() and others
 fn model(app: &App) -> Model {
-    let width: u32 = 10;
-    let height: u32 = 10;
+    let width: u32 = 30;
+    let height: u32 = 30;
     
-    let mut field = Vec::new();
+    let mut grid = Vec::new();
     
     for row in 0..height {
         let mut row_nodes = Vec::new();
         for col in 0..width {
             row_nodes.push(Node::new(row, col));
         }
-        field.push(row_nodes);
+        grid.push(row_nodes);
     }
 
-    let start: (u32, u32) = (8, 9);
-    let goal: (u32, u32) = (3, 4);
+    let start: (u32, u32) = (0, 0);
+    let goal: (u32, u32) = (15, 27);
 
     // setting start/goal node colors to blue/green
-    field[start.0 as usize][start.1 as usize].color_id = 0;
-    field[goal.0 as usize][goal.1 as usize].color_id = 1;
+    grid[start.0 as usize][start.1 as usize].color_id = 0;
+    grid[goal.0 as usize][goal.1 as usize].color_id = 1;
     
-
-    let scale = 50;
+    let scale = 30;
 
     app.new_window()
         // fit the window to the grid
@@ -49,25 +49,21 @@ fn model(app: &App) -> Model {
         .build()
         .unwrap();
 
-    let mut model = Model {
-        field: field,
-        field_scale: scale,
+    Model {
+        grid: grid,
+        grid_scale: scale,
         start: start,
         goal: goal,
-    };
-
-    if let Some(path) = astar::search(&mut model) {
-        for (row, col) in path {
-            println!("NODE ({}, {})", row, col);
-            model.field[row as usize][col as usize].color_id = 2;
-        }
-    } else {
-        println!("astar failed");
+        path: None
     }
-
-    model
 }
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {
-    // update your model here
+    if _model.path.is_none() {
+        if let Some(path) = astar::search(_model) {
+            _model.path = Some(path);
+        } else {
+            println!("astar failed");
+        }
+    }
 }
