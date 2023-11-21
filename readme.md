@@ -8,4 +8,4 @@ Sebastian Lague's pathfinding: https://www.youtube.com/watch?app=desktop&v=-L-Wg
 
 https://en.wikipedia.org/wiki/A*_search_algorithm
 
-This project is not finished due to some annoyances like lack of binary heap item contains()/remove().
+This project is not finished due to some annoyances, mainly the lack of binary heap item contains()/remove().
