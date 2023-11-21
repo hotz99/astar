@@ -1,5 +1,6 @@
 mod astar;
 mod grid;
+mod obstacles;
 
 use grid::Node;
 use nannou::prelude::*;
@@ -13,17 +14,17 @@ pub struct Model {
     grid_scale: u32,
     start: (u32, u32),
     goal: (u32, u32),
-    path: Option<Vec<(u32, u32)>>
+    path: Option<Vec<(u32, u32)>>,
 }
 
 // app state
-// shared by reference to search() and others
+// shared as reference to search() and others
 fn model(app: &App) -> Model {
-    let width: u32 = 30;
-    let height: u32 = 30;
-    
+    let width: u32 = 60;
+    let height: u32 = 60;
+
     let mut grid = Vec::new();
-    
+
     for row in 0..height {
         let mut row_nodes = Vec::new();
         for col in 0..width {
@@ -33,18 +34,19 @@ fn model(app: &App) -> Model {
     }
 
     let start: (u32, u32) = (0, 0);
-    let goal: (u32, u32) = (15, 27);
+    let goal: (u32, u32) = (59, 59);
 
-    // setting start/goal node colors to blue/green
+    obstacles::random(&mut grid, 1000);
+
+    // set start/goal node colors to blue/green
     grid[start.0 as usize][start.1 as usize].color_id = 0;
     grid[goal.0 as usize][goal.1 as usize].color_id = 1;
-    
-    let scale = 30;
+
+    let scale = 20;
 
     app.new_window()
-        // fit the window to the grid
+        // fit window to grid
         .size(width * scale, height * scale)
-        // .size(512, 512)
         .view(grid::draw)
         .build()
         .unwrap();
@@ -54,7 +56,7 @@ fn model(app: &App) -> Model {
         grid_scale: scale,
         start: start,
         goal: goal,
-        path: None
+        path: None,
     }
 }
 

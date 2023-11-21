@@ -1,5 +1,5 @@
-use std::cmp::{Ordering, self};
-use std::collections::{BinaryHeap, HashSet, HashMap};
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 use ordered_float::OrderedFloat;
 
@@ -11,48 +11,52 @@ pub fn search(model: &mut Model) -> Option<Vec<(u32, u32)>> {
     let start = grid[model.start.0 as usize][model.start.1 as usize];
     let goal = grid[model.goal.0 as usize][model.goal.1 as usize];
 
-    println!("{start:?}");
-    println!("{goal:?}");
-    
     // nodes to be evaluated
     let mut open: BinaryHeap<NodeState> = BinaryHeap::new();
-    open.push(NodeState::new(start, OrderedFloat::from(0.0), euclidean(&start, &goal)));
+    open.push(NodeState::new(
+        start,
+        OrderedFloat::from(0.0),
+        euclidean(&start, &goal),
+    ));
 
-    // nodes already evaluated
-    // no need to order closed nodes, so we use a (hash)set
+    // already evaluated nodes
+    // no need to order closed nodes, then use (hash)set
     let mut closed: HashSet<Node> = HashSet::new();
 
     // children nodes come from parent nodes
     let mut parents: HashMap<Node, Node> = HashMap::new();
 
     while open.len() > 0 {
-        // open is a min-heap, peek() returns the root of the heap
-        // checking if peek() does not return None
         if let Some(node_state) = open.pop() {
             let current = node_state.node;
-            
+
             if current == goal {
                 return Some(path(&parents, current));
             }
-            
+
             closed.insert(current);
 
             for neighbor in get_neighbors(grid, &current) {
-                if closed.contains(&neighbor) {
+                // is obstacle OR closed
+                if neighbor.color_id == 3 || closed.contains(&neighbor) {
                     continue;
                 }
 
-                // tentative_g_score is the distance from start to the neighbor through current
+                // distance from start to the neighbor through current
                 let tentative_g_score = node_state.g_cost + euclidean(&current, &neighbor);
 
-                let mut neighbor_state = NodeState::new(neighbor, euclidean(&start, &neighbor), euclidean(&neighbor, &goal));
+                let mut neighbor_state = NodeState::new(
+                    neighbor,
+                    euclidean(&start, &neighbor),
+                    euclidean(&neighbor, &goal),
+                );
 
-                // if this path to neighbor is better than previous one
+                // if this path to neighbor is better than previous
                 if tentative_g_score < neighbor_state.g_cost {
                     neighbor_state.g_cost = tentative_g_score;
                     neighbor_state.f_cost = tentative_g_score + neighbor_state.h_cost;
 
-                        // binary heaps dont have .contains()
+                    // binary heaps lack .contains()
                 } else if !open.iter().any(|x| x.node == neighbor) {
                     open.push(neighbor_state);
                 }
@@ -85,7 +89,6 @@ fn path(parents: &HashMap<Node, Node>, node: Node) -> Vec<(u32, u32)> {
     path
 }
 
-
 fn get_neighbors(grid: &Vec<Vec<Node>>, node: &Node) -> Vec<Node> {
     let mut neighbors = Vec::new();
 
@@ -108,29 +111,33 @@ fn get_neighbors(grid: &Vec<Vec<Node>>, node: &Node) -> Vec<Node> {
     neighbors
 }
 
-// binary heap -> priority queue
-// priority queue depends on 'Ord'
-// implement the trait such that the bin heap becomes a min-heap
-
 #[derive(Clone, PartialEq, Eq)]
 struct NodeState {
     node: Node,
     g_cost: OrderedFloat<f32>,
     h_cost: OrderedFloat<f32>,
     // f(n) = g(n) + h(n)
-    f_cost: OrderedFloat<f32>
+    f_cost: OrderedFloat<f32>,
 }
 
 impl NodeState {
     fn new(node: Node, g_cost: OrderedFloat<f32>, h_cost: OrderedFloat<f32>) -> NodeState {
-        NodeState { node: (node), g_cost: (g_cost), h_cost: (h_cost), f_cost: (g_cost + h_cost) }
+        NodeState {
+            node: (node),
+            g_cost: (g_cost),
+            h_cost: (h_cost),
+            f_cost: (g_cost + h_cost),
+        }
     }
 }
 
 impl Ord for NodeState {
     fn cmp(&self, other: &Self) -> Ordering {
-        // Use f_cost for ordering (min-heap)
-        self.f_cost.partial_cmp(&other.f_cost).unwrap_or(Ordering::Equal).reverse()
+        // use f_cost for ordering (min-heap)
+        self.f_cost
+            .partial_cmp(&other.f_cost)
+            .unwrap_or(Ordering::Equal)
+            .reverse()
     }
 }
 

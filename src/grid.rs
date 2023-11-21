@@ -26,14 +26,14 @@ pub fn draw(app: &App, model: &Model, frame: Frame) {
 
     let grid = &model.grid;
     let scale = &model.grid_scale;
-    
+
     // draw nodes
     for i in 0..grid.len() {
         for j in 0..grid[0].len() {
             let node = &grid[i][j];
 
             let side = (scale - 1) as f32;
-            
+
             // node origin will be top left corner
             let node_visual = Rect::from_w_h(side, side).top_left_of(win);
 
@@ -108,7 +108,6 @@ pub fn draw(app: &App, model: &Model, frame: Frame) {
             .end(end)
             .stroke_weight(4.0)
             .color(color);
-
     }
 
     draw.to_frame(app, &frame).unwrap();
@@ -122,6 +121,8 @@ fn get_color_of_id(id: i32) -> Srgb<u8> {
         // finish node
         1 => LIMEGREEN,
         2 => YELLOW,
+        // obstacle
+        3 => BLACK,
         _ => LIGHTGREY,
     }
 }
