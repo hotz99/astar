@@ -20,8 +20,8 @@ pub struct Model {
 // app state
 // shared as reference to search() and others
 fn model(app: &App) -> Model {
-    let width: u32 = 60;
-    let height: u32 = 60;
+    let width: u32 = 30;
+    let height: u32 = 30;
 
     let mut grid = Vec::new();
 
@@ -34,15 +34,15 @@ fn model(app: &App) -> Model {
     }
 
     let start: (u32, u32) = (0, 0);
-    let goal: (u32, u32) = (59, 59);
+    let goal: (u32, u32) = (29, 29);
 
-    obstacles::random(&mut grid, 1000);
+    obstacles::random(&mut grid, 45);
 
     // set start/goal node colors to blue/green
     grid[start.0 as usize][start.1 as usize].color_id = 0;
     grid[goal.0 as usize][goal.1 as usize].color_id = 1;
 
-    let scale = 20;
+    let scale = 40;
 
     app.new_window()
         // fit window to grid

@@ -55,9 +55,10 @@ pub fn search(model: &mut Model) -> Option<Vec<(u32, u32)>> {
                 if tentative_g_score < neighbor_state.g_cost {
                     neighbor_state.g_cost = tentative_g_score;
                     neighbor_state.f_cost = tentative_g_score + neighbor_state.h_cost;
+                }
 
-                    // binary heaps lack .contains()
-                } else if !open.iter().any(|x| x.node == neighbor) {
+                // binary heaps lack .contains()
+                if !open.iter().any(|x| x.node == neighbor) {
                     open.push(neighbor_state);
                 }
 
