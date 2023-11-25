@@ -7,5 +7,3 @@ https://medium.com/coding-rust/max-heap-min-heap-priority-queue-with-custom-comp
 Sebastian Lague's pathfinding: https://www.youtube.com/watch?app=desktop&v=-L-WgKMFuhE
 
 https://en.wikipedia.org/wiki/A*_search_algorithm
-
-This project is not finished due to some annoyances, mainly the lack of binary heap item contains()/remove().

@@ -53,6 +53,7 @@ pub fn search(model: &mut Model) -> Option<Vec<(u32, u32)>> {
 
                 // if this path to neighbor is better than previous
                 if tentative_g_score < neighbor_state.g_cost {
+                    open.retain(|x| *x != neighbor_state);
                     neighbor_state.g_cost = tentative_g_score;
                     neighbor_state.f_cost = tentative_g_score + neighbor_state.h_cost;
                 }

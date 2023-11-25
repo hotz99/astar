@@ -34,7 +34,7 @@ fn model(app: &App) -> Model {
     }
 
     let start: (u32, u32) = (0, 0);
-    let goal: (u32, u32) = (29, 29);
+    let goal: (u32, u32) = (29, 19);
 
     obstacles::random(&mut grid, 45);
 
